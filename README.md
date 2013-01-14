@@ -6,7 +6,7 @@ This library manifests a javascript module providing asynchronous method calls a
 
 ## Installing for Node.JS via NPM
 
-The latest stable release is available via `npm install doctape-api`.
+The latest stable release is available via `npm install doctape`.
 
 
 ## Installing for client side via jQuery

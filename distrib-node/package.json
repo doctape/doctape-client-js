@@ -1,6 +1,6 @@
 {
-  "name": "doctape-api",
-  "version": "0.1.5",
+  "name": "doctape",
+  "version": "0.1.6",
   "description": "Asynchronous calls against the doctape API",
   "main": "doctape.js",
   "scripts": {
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/doctape/doctape-api"
+    "url": "https://github.com/doctape/doctape-client-js"
   },
   "keywords": [
     "doctape",
