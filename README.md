@@ -73,7 +73,7 @@ When using this library on a platform which is neither of the two, it is easy to
 
 ### Issues and Pull Requests
 
-We gladly accept Issues as well as Pull Requests via our [GitHub Repository](http://github.com/doctape/doctape-api).
+We gladly accept Issues as well as Pull Requests via our [GitHub Repository](http://github.com/doctape/doctape-client-js).
 
 ### Extending the set of resource methods
 
