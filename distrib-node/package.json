@@ -1,0 +1,28 @@
+{
+  "name": "doctape-api",
+  "version": "0.1.5",
+  "description": "Asynchronous calls against the doctape API",
+  "main": "doctape.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/doctape/doctape-api"
+  },
+  "keywords": [
+    "doctape",
+    "rest",
+    "oauth",
+    "http",
+    "api",
+    "client",
+    "server",
+    "async",
+    "file",
+    "doc",
+    "tape"
+  ],
+  "author": "doctape",
+  "license": "MIT"
+}
