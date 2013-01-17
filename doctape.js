@@ -115,12 +115,13 @@
            this.options.host + (this.options.port ? ':' + this.options.port : '');
   };
 
-  var authUrl = DoctapeCore.prototype.authUrl = function () {
+  var authUrl = DoctapeCore.prototype.authUrl = function (redirect) {
+    var uri = rediect || 'urn:ietf:wg:oauth:2.0:oob';
     return '/' + 'oauth2' +
            '?' + 'response_type=' + 'code' +
            '&' + 'client_id='     + encodeURIComponent(this.options.client_id) +
            '&' + 'scope='         + encodeURIComponent(this.options.scope.join(' ')) +
-           '&' + 'redirect_uri='  + 'urn:ietf:wg:oauth:2.0:oob';
+           '&' + 'redirect_uri='  + uri;
   };
 
 
