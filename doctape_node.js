@@ -28,7 +28,8 @@ var Doctape = module.exports = function () {
 
   self.env.req = function (options, cb) {
 
-    var mod = (options.protocol == 'http') ? http : https;
+    var mod = (options.protocol === 'http') ? http : https;
+    options.protocol = undefined;
 
     var req = mod.request(options, function (resp) {
 
