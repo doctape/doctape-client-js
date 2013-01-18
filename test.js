@@ -3,11 +3,20 @@ var should = require('should');
 var Doctape = require('./doctape_node.js');
 
 var target = {
-  url: 'https://my.doctape.com',
-  protocol: 'https',
-  host: 'my.doctape.com',
-  port: null,
-  base: '/v1',
+  authPt: {
+    url: 'https://my.doctape.com/oauth2',
+    protocol: 'https',
+    host: 'my.doctape.com',
+    port: null,
+    base: '/oauth2'
+  },
+  resourcePt: {
+    url: 'https://api.doctape.com/v1',
+    protocol: 'https',
+    host: 'api.doctape.com',
+    port: null,
+    base: '/v1'
+  },
   scope: ['docs', 'account'],
   client_id: null /* INSERT CLIENT ID HERE */,
   client_secret: null /* INSERT CLIENT SECRET HERE */,
@@ -30,9 +39,8 @@ describe('Doctape', function () {
 
     it('should contain a complete options object', function () {
       should.exist(dt.options);
-      dt.options.should.have.property('host').and.be.a('string');
-      dt.options.should.have.property('port', null);
-      dt.options.should.have.property('base').and.be.a('string');
+      dt.options.should.have.property('authPt');
+      dt.options.should.have.property('resourcePt');
       dt.options.should.have.property('scope').and.be.empty;
       dt.options.should.have.property('client_id', null);
       dt.options.should.have.property('client_secret', null);
@@ -95,12 +103,22 @@ describe('Doctape', function () {
       dt.clientSecret().should.eql('bar');
     });
 
-    it('should set and return valid and correct baseUrl', function () {
-      dt.setBaseUrl('https://foo.com:42');
-      dt.options.protocol.should.eql('https');
-      dt.options.host.should.eql('foo.com');
-      dt.options.port.should.eql(42);
-      dt.baseUrl().should.eql('https://foo.com:42');
+    it('should set and return valid and correct authPt', function () {
+      dt.setAuthPt('https://foo.com:42/bar');
+      dt.options.authPt.protocol.should.eql('https');
+      dt.options.authPt.host.should.eql('foo.com');
+      dt.options.authPt.port.should.eql(42);
+      dt.options.authPt.base.should.eql('/bar');
+      dt.authPt().should.eql('https://foo.com:42/bar');
+    });
+
+    it('should set and return valid and correct resourcePt', function () {
+      dt.setResourcePt('https://foo.com:42/bar');
+      dt.options.resourcePt.protocol.should.eql('https');
+      dt.options.resourcePt.host.should.eql('foo.com');
+      dt.options.resourcePt.port.should.eql(42);
+      dt.options.resourcePt.base.should.eql('/bar');
+      dt.resourcePt().should.eql('https://foo.com:42/bar');
     });
 
     it('should return valid and correct authUrl');
@@ -111,8 +129,8 @@ describe('Doctape', function () {
 
     beforeEach(function () {
       dt = new Doctape();
-      dt.setBaseUrl(target.url);
-      dt.options.base = target.base;
+      dt.setAuthPt(target.authPt.url);
+      dt.setResourcePt(target.resourcePt.url)
       dt.setScope(target.scope);
       dt.setCredentials(target.client_id, target.client_secret);
     });
@@ -122,10 +140,8 @@ describe('Doctape', function () {
     });
 
     it('should be configured', function () {
-      dt.options.should.have.property('protocol').and.eql(target.protocol);
-      dt.options.should.have.property('host').and.eql(target.host);
-      dt.options.should.have.property('port').and.eql(target.port);
-      dt.options.should.have.property('base').and.be.a('string').and.be.not.empty;
+      dt.options.should.have.property('authPt');
+      dt.options.should.have.property('resourcePt');
       dt.options.should.have.property('scope').and.be.a('object');
       dt.options.should.have.property('client_secret').and.be.a('string').and.be.not.empty;
       dt.options.should.have.property('client_id').and.be.a('string').and.be.not.empty;

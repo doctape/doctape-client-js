@@ -12,10 +12,18 @@
     // The API configuration is currently hard-coded.
 
     this.options = {
-      protocol: 'https',
-      host:  'my.doctape.com',
-      port:  null,
-      base:  '/v1',
+      authPt: {
+        protocol: 'https',
+        host:  'my.doctape.com',
+        port:  null,
+        base:  '/oauth2'
+      },
+      resourcePt: {
+        protocol: 'https',
+        host:  'api.doctape.com',
+        port:  null,
+        base:  '/v1'
+      },
       scope: [],
       client_id:     null,
       client_secret: null
@@ -103,25 +111,41 @@
     };
   };
 
-  var setBaseUrl = DoctapeCore.prototype.setBaseUrl = function (url) {
-    var parts = url.match(/([a-z]+):\/\/([^:]+):?([0-9]+)?/);
-    this.options.protocol = parts[1]               || null;
-    this.options.host     = parts[2]               || null;
-    this.options.port     = parseInt(parts[3], 10) || null;
+  var setAuthPt = DoctapeCore.prototype.setAuthPt = function (url) {
+    var parts = url.match(/([a-z]+):\/\/([^:]+):?([0-9]+)?(\/.*)/);
+    this.options.authPt.protocol = parts[1]               || null;
+    this.options.authPt.host     = parts[2]               || null;
+    this.options.authPt.port     = parseInt(parts[3], 10) || null;
+    this.options.authPt.base     = parts[4]               || null;
   };
 
-  var baseUrl = DoctapeCore.prototype.baseUrl = function () {
-    return this.options.protocol + '://' +
-           this.options.host + (this.options.port ? ':' + this.options.port : '');
+  var authPt = DoctapeCore.prototype.authPt = function () {
+    return this.options.authPt.protocol + '://' + this.options.authPt.host +
+           (this.options.authPt.port ? ':' + this.options.authPt.port : '') +
+           this.options.authPt.base;
   };
 
   var authUrl = DoctapeCore.prototype.authUrl = function (redirect) {
-    var uri = rediect || 'urn:ietf:wg:oauth:2.0:oob';
-    return '/' + 'oauth2' +
+    var uri = redirect || 'urn:ietf:wg:oauth:2.0:oob';
+    return authPt.call(this) +
            '?' + 'response_type=' + 'code' +
            '&' + 'client_id='     + encodeURIComponent(this.options.client_id) +
            '&' + 'scope='         + encodeURIComponent(this.options.scope.join(' ')) +
            '&' + 'redirect_uri='  + uri;
+  };
+
+  var setResourcePt = DoctapeCore.prototype.setResourcePt = function (url) {
+    var parts = url.match(/([a-z]+):\/\/([^:]+):?([0-9]+)?(\/.*)/);
+    this.options.resourcePt.protocol = parts[1]               || null;
+    this.options.resourcePt.host     = parts[2]               || null;
+    this.options.resourcePt.port     = parseInt(parts[3], 10) || null;
+    this.options.resourcePt.base     = parts[4]               || null;
+  };
+
+  var resourcePt = DoctapeCore.prototype.resourcePt = function () {
+    return this.options.resourcePt.protocol + '://' + this.options.resourcePt.host +
+           (this.options.resourcePt.port ? ':' + this.options.resourcePt.port : '') +
+           this.options.resourcePt.base;
   };
 
 
@@ -130,13 +154,13 @@
   // Not for direct use.
 
   /**
-   * Perform a standard POST-request with raw form post data.
+   * Perform a standard POST-request to the auth point with raw form post data.
    *
    * @param {string} path
    * @param {Object} data
    * @param {function (Object, Object=)} cb
    */
-  var postRaw = function (path, data, cb) {
+  var postAuth = function (path, data, cb) {
     var lines = [];
     var field;
     for (field in data) {
@@ -144,9 +168,9 @@
     }
     this.env.req({
       method:   'POST',
-      host:     this.options.host,
-      port:     this.options.port,
-      path:     path,
+      host:     this.options.authPt.host,
+      port:     this.options.authPt.port,
+      path:     this.options.authPt.base + path,
       headers:  {'Content-Type': 'application/x-www-form-urlencoded'},
       postData: lines.join('&')
     }, cb);
@@ -164,14 +188,14 @@
    * @param {string} endpoint
    * @param {function (Object, Object=)} cb
    */
-  var getAuthorized = DoctapeCore.prototype.getAuthorized = function (endpoint, cb) {
+  var getResource = DoctapeCore.prototype.getResource = function (endpoint, cb) {
     var self = this;
     withValidAccessToken.call(this, function (token) {
       self.env.req({
         method:  'GET',
-        host:    self.options.host,
-        port:    self.options.port,
-        path:    self.options.base + endpoint,
+        host:    self.options.resourcePt.host,
+        port:    self.options.resourcePt.port,
+        path:    self.options.resourcePt.base + endpoint,
         headers: {'Authorization': 'Bearer ' + token}
       }, cb);
     });
@@ -184,14 +208,14 @@
    * @param {Object} data
    * @param {function (Object, Object=)} cb
    */
-  var postAuthorized = DoctapeCore.prototype.postAuthorized = function (endpoint, data, cb) {
+  var postResource = DoctapeCore.prototype.postResource = function (endpoint, data, cb) {
     var self = this;
     withValidAccessToken.call(this, function (token) {
       self.env.req({
         method:   'POST',
-        host:     self.options.host,
-        port:     self.options.port,
-        path:     self.options.base + endpoint,
+        host:     self.options.resourcePt.host,
+        port:     self.options.resourcePt.port,
+        path:     self.options.resourcePt.base + endpoint,
         headers:  {'Authorization': 'Bearer ' + token,
                    'Content-Type': 'application/json; charset=UTF-8'},
         postData: JSON.stringify(data)
@@ -205,14 +229,14 @@
    * @param {string} endpoint
    * @param {function (Object, Object=)} cb
    */
-  var deleteAuthorized = DoctapeCore.prototype.deleteAuthorized = function (endpoint, cb) {
+  var deleteResource = DoctapeCore.prototype.deleteResource = function (endpoint, cb) {
     var self = this;
     withValidAccessToken.call(this, function (token) {
       self.env.req({
         method:  'DELETE',
-        host:    self.options.host,
-        port:    self.options.port,
-        path:    self.options.base + endpoint,
+        host:    self.options.resourcePt.host,
+        port:    self.options.resourcePt.port,
+        path:    self.options.resourcePt.base + endpoint,
         headers: {'Authorization': 'Bearer ' + token}
       }, cb);
     });
@@ -266,7 +290,7 @@
   var oauthExchange = DoctapeCore.prototype.oauthExchange = function (code) {
     if (this._lock_refresh === undefined) {
       this._lock_refresh = true;
-      postRaw.call(this, '/oauth2/token',
+      postAuth.call(this, '/token',
         { code:          code,
           client_id:     this.options.client_id,
           client_secret: this.options.client_secret,
@@ -283,7 +307,7 @@
   var oauthRefresh = DoctapeCore.prototype.oauthRefresh = function () {
     if (this._lock_refresh === undefined) {
       this._lock_refresh = true;
-      postRaw.call(this, '/oauth2/token',
+      postAuth.call(this, '/token',
         { refresh_token: this._token.refresh,
           client_id:     this.options.client_id,
           client_secret: this.options.client_secret,
@@ -329,7 +353,7 @@
    * @param {function (Object, Object=)} cb
    */
   DoctapeCore.prototype.account = function (cb) {
-    getAuthorized.call(this, '/account',
+    getResource.call(this, '/account',
                        function (err, data) {
       if (err) { return cb(err); }
       data = JSON.parse(data);
@@ -346,7 +370,7 @@
    * @param {function (Object, Object=)} cb
    */
   DoctapeCore.prototype.list = function (cb) {
-    getAuthorized.call(this, '/doc',
+    getResource.call(this, '/doc',
                        function (err, data) {
       if (err) { return cb(err); }
       data = JSON.parse(data);
@@ -364,7 +388,7 @@
    * @param {function (Object, Object=)} cb
    */
   DoctapeCore.prototype.get = function (docId, cb) {
-    getAuthorized.call(this, '/doc/' + docId,
+    getResource.call(this, '/doc/' + docId,
                        function (err, data) {
       if (err) { return cb(err); }
       data = JSON.parse(data);
@@ -384,7 +408,7 @@
    * @param {function (Object, Object=)} cb
    */
   DoctapeCore.prototype.download = function (docId, filename, cb) {
-    getAuthorized.call(this, '/doc/' + docId + '/' + filename,
+    getResource.call(this, '/doc/' + docId + '/' + filename,
                        function (err, data) {
       if (err) { return cb(err); }
       return cb(null, data);
@@ -400,7 +424,7 @@
    * @param {function (Object, Object=)} cb
    */
   DoctapeCore.prototype.update = function (docId, params, cb) {
-    postAuthorized.call(this, '/doc/' + docId,
+    postResource.call(this, '/doc/' + docId,
                         params,
                         function (err, data) {
       if (err) { return cb(err); }
@@ -419,7 +443,7 @@
    * @param {function (Object, Object=)} cb
    */
   DoctapeCore.prototype.destroy = function (docId, cb) {
-    deleteAuthorized.call(this, '/doc/' + docId,
+    deleteResource.call(this, '/doc/' + docId,
                           function (err, data) {
       if (err) { return cb(err); }
       data = JSON.parse(data);
@@ -439,7 +463,7 @@
    * @param {function (Object, Object=)} cb
    */
   DoctapeCore.prototype.setPublic = function (docId, state, cb) {
-    postAuthorized.call(this, '/doc/' + docId + '/public',
+    postResource.call(this, '/doc/' + docId + '/public',
                         {'public': state},
                         function (err, data) {
       if (err) { return cb(err); }
