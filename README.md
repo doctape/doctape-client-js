@@ -18,7 +18,7 @@ Just include `distrib-browser/doctape.js` in your web project.
 
 The first step in using the library is creating an instance of the `Doctape` prototype and setting it up via `setScope(array)` and `setCredentials(id, secret)`.
 
-Then you may retrieve an authorization code via the OAuth endpoint. You can do so via the [Passport](http://passportjs.org/guide/) Provider we created, or by directing your users to the URL returned by `authUrl()`, relative to `baseUrl()`.
+Then you may retrieve an authorization code via the OAuth endpoint. You can do so via the [Passport](http://passportjs.org/guide/) Provider we created, or by directing your users to the URL returned by `authUrl()` (to which you can optionally pass a redirect_uri parameter).
 
 Once you are in possession of such authorization code, you use it as a parameter to `oauthExchange(code)`, which will perform an OAuth token exchange and save the retrieved token in your object. If this procedure fails, an `auth.fail` w/ error data, otherwise an `auth.refresh` event w/ the token data will be emitted.
 
@@ -28,7 +28,7 @@ If the exchange procedure was successful, you can use the resource methods to ac
 
 If you wish to perform an action not provided by this library, you may:
 
-- Either: Use `getAuthorized`, `postAuthorized` and `deleteAuthorized` methods to perform authorized network requests. See section *Contributing* / *Extending the set of resource methods* for more information. If you think your addition may be useful to others, please consider issuing a Pull Request to us.
+- Either: Use `getResource`, `postResource` and `deleteResource` methods to perform authorized network requests to resources. See section *Contributing* / *Extending the set of resource methods* for more information. If you think your addition may be useful to others, please consider issuing a Pull Request to us.
 - Or: Use the method `withValidAccessToken` to execute a function retrieving as parameter a valid access token.
 
 
@@ -79,7 +79,7 @@ We gladly accept Issues as well as Pull Requests via our [GitHub Repository](htt
 
 The current set of methods mapping to resources on our API is incomplete. A documentation of all our API resources can be found in the [doctape devcenter](https://developer.doctape.com/resources).
 
-When creating a new wrapper-method one uses the methods `getAuthorized`, `postAuthorized` and `deleteAuthorized` all of which accept a string indicating API endpoint (i.e. `/doc`) and a callback function in the form of (`function cb(err, data)`). When the callback is called, the data may be `JSON.parse`d and, if the field `data.error` is not set, the data can be evaluated.
+When creating a new wrapper-method one uses the methods `getResource`, `postResource` and `deleteResource` all of which accept a string indicating API endpoint (i.e. `/doc`) and a callback function in the form of (`function cb(err, data)`). When the callback is called, the data may be `JSON.parse`d and, if the field `data.error` is not set, the data can be evaluated.
 
 The structure of the JSON data can be examined in the [doctape devcenter](https://developer.doctape.com/resources), also.
 
