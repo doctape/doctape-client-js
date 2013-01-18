@@ -23,7 +23,7 @@ window.Doctape = function () {
 
   self.env.req = function (options, cb) {
     var ajaxOptions = {
-      url: self.options.protocol + '://' + options.host +
+      url: options.protocol + '://' + options.host +
            (options.port ? ':' + options.port : '') + options.path,
       type: options.method || 'GET',
       headers: options.headers || {}

@@ -168,6 +168,7 @@
     }
     this.env.req({
       method:   'POST',
+      protocol: this.options.authPt.protocol,
       host:     this.options.authPt.host,
       port:     this.options.authPt.port,
       path:     this.options.authPt.base + path,
@@ -192,11 +193,12 @@
     var self = this;
     withValidAccessToken.call(this, function (token) {
       self.env.req({
-        method:  'GET',
-        host:    self.options.resourcePt.host,
-        port:    self.options.resourcePt.port,
-        path:    self.options.resourcePt.base + endpoint,
-        headers: {'Authorization': 'Bearer ' + token}
+        method:   'GET',
+        protocol: self.options.resourcePt.protocol,
+        host:     self.options.resourcePt.host,
+        port:     self.options.resourcePt.port,
+        path:     self.options.resourcePt.base + endpoint,
+        headers:  {'Authorization': 'Bearer ' + token}
       }, cb);
     });
   };
@@ -213,6 +215,7 @@
     withValidAccessToken.call(this, function (token) {
       self.env.req({
         method:   'POST',
+        protocol: self.options.resourcePt.protocol,
         host:     self.options.resourcePt.host,
         port:     self.options.resourcePt.port,
         path:     self.options.resourcePt.base + endpoint,
@@ -233,11 +236,12 @@
     var self = this;
     withValidAccessToken.call(this, function (token) {
       self.env.req({
-        method:  'DELETE',
-        host:    self.options.resourcePt.host,
-        port:    self.options.resourcePt.port,
-        path:    self.options.resourcePt.base + endpoint,
-        headers: {'Authorization': 'Bearer ' + token}
+        method:   'DELETE',
+        protocol: self.options.resourcePt.protocol,
+        host:     self.options.resourcePt.host,
+        port:     self.options.resourcePt.port,
+        path:     self.options.resourcePt.base + endpoint,
+        headers:  {'Authorization': 'Bearer ' + token}
       }, cb);
     });
   };
@@ -504,7 +508,7 @@ var Doctape = module.exports = function () {
 
   self.env.req = function (options, cb) {
 
-    var mod = (self.options.protocol == 'http') ? http : https;
+    var mod = (options.protocol == 'http') ? http : https;
 
     var req = mod.request(options, function (resp) {
 
