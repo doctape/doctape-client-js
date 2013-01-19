@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <script src="http://code.jquery.com/jquery-1.6.1.js"></script>
+  <script src="./src/core.js"></script>
+  <script src="./src/simple.js"></script>
+  <script src="./src/wrapper-browser-simple.js"></script>
+  <title>doctape API Test Examples</title>
+</head>
+<body>
+
+</body>
+<script type="text/javascript">
+  jQuery.support.cors = true;
+
+  window.dt = new Doctape({
+    appType:     'server',
+    appId:       'a6015f8e-9f62-4d08-80fe-8969c53f566b',
+    appSecret:   '6767689e-2f64-4575-b364-37956ca0cda9',
+    callbackURL: 'urn:ietf:wg:oauth:2.0:oob',
+    scope:       ['docs', 'account']
+  });
+
+  dt.onauthfail = function () {
+    console.log('AUTH FAIL!');
+  };
+
+  function proceed (code) {
+    dt.useCode(code, function () {
+      this.getAccount(function (acc) {
+        console.log(acc);
+      });
+    });
+  }
+
+  console.log(dt.authURL);
+
+</script>
