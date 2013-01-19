@@ -47,7 +47,11 @@ window.Doctape = function (config) {
     if (!token) {
       window.location = self.authURL;
     } else {
-      self.useToken(token, cb);
+      self.useToken({
+        token_type:   'Bearer',
+        expires_in:   3600,
+        access_token: token
+      }, cb);
     }
   }
 

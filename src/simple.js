@@ -52,7 +52,7 @@
       }
     });
     this.core.subscribe('auth.refresh', _cb);
-    this.core.oauthExchange(code);
+    this.core.exchange(code);
   };
 
   /*
@@ -66,11 +66,7 @@
         _this.onauthfail.call(this);
       }
     });
-    this.core.setToken({
-      token_type:   'Bearer',
-      expires_in:   3600,
-      access_token: token
-    });
+    this.core.setToken(token);
     cb.call(this);
   }
 

@@ -1,17 +1,12 @@
 (function () {
 
-  var main = this;
-
   // ## Core Constructor
 
   // The Doctape core module consists of a platform-independent
-  // DoctapeCore-class which holds the configuration and owns also
-  // the platform-independent front-end functions.
+  // DoctapeCore-class which holds the configuration and performs
+  // the OAuth procedures.
 
-  /** @constructor */
-  var DoctapeCore = function () {
-
-    // The API configuration is currently hard-coded.
+  var DoctapeCore = this['DoctapeCore'] = function () {
 
     this.options = {
       authPt: {
@@ -52,12 +47,6 @@
     };
 
   };
-
-  // We currently use this to register with the top-level.
-  // It may be worthwhile to find a way to also abstract this
-  // into the environments.
-
-  main['DoctapeCore'] = DoctapeCore;
 
 
   // ## Getter / Setter Functions
@@ -230,7 +219,7 @@
         unsubscribe.call(self, 'auth.refresh', on_refresh);
       };
       subscribe.call(this, 'auth.refresh', on_refresh);
-      oauthRefresh.call(this);
+      refresh.call(this);
     }
   };
 
@@ -260,7 +249,7 @@
    *
    * @param {string} code
    */
-  var oauthExchange = DoctapeCore.prototype.oauthExchange = function (code) {
+  var exchange = DoctapeCore.prototype.exchange = function (code) {
     if (this._lock_refresh === undefined) {
       this._lock_refresh = true;
       postAuth.call(this, '/token',
@@ -277,7 +266,7 @@
    * Get a new access token by using the already-received refresh
    * token.
    */
-  var oauthRefresh = DoctapeCore.prototype.oauthRefresh = function () {
+  var refresh = DoctapeCore.prototype.refresh = function () {
     if (this._lock_refresh === undefined) {
       this._lock_refresh = true;
       postAuth.call(this, '/token',
