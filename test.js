@@ -1,6 +1,6 @@
 var should = require('should');
 
-var Doctape = require('./doctape_node.js');
+var Doctape = require('./distrib-node/doctape.js');
 
 var target = {
   authPt: {

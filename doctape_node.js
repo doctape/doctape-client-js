@@ -3,7 +3,7 @@ var events = require('events');
 var http   = require('http');
 var https  = require('https');
 
-var DoctapeCore = require('./doctape.js');
+var DoctapeCore = this.DoctapeCore;
 
 var Doctape = module.exports = function () {
 
