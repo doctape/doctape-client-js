@@ -1,5 +1,7 @@
 (function () {
 
+  var DoctapeCore = this.DoctapeCore;
+
   // ## Simple Constructor
 
   // The DoctapeSimple class holds the DoctapeCore object
