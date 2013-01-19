@@ -128,7 +128,7 @@
   var authUrl = DoctapeCore.prototype.authUrl = function (redirect, type) {
     var uri  = redirect || 'urn:ietf:wg:oauth:2.0:oob';
     return authPt.call(this) +
-           '?' + 'response_type=' + (type || 'code') +
+           '?' + 'response_type=' + (type || 'code') +
            '&' + 'client_id='     + encodeURIComponent(this.options.client_id) +
            '&' + 'scope='         + encodeURIComponent(this.options.scope.join(' ')) +
            '&' + 'redirect_uri='  + uri;
