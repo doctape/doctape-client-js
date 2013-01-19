@@ -1,5 +1,5 @@
-node: src/doctape.js src/doctape_node.js
-	cat src/doctape.js src/doctape_node.js > distrib-node/doctape.js
+node: src/core.js src/wrapper-node.js
+	cat src/core.js src/wrapper-node.js > distrib-node/doctape.js
 
-browser: src/doctape.js src/doctape_browser.js
-	cat src/doctape.js src/doctape_browser.js > distrib-browser/doctape.js
+browser: src/core.js src/wrapper-browser.js
+	cat src/core.js src/wrapper-browser.js > distrib-browser/doctape.js
