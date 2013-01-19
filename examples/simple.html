@@ -8,10 +8,13 @@
   <title>doctape API Test Examples</title>
 </head>
 <body>
-
+<h1 id="head"></h1>
+<table id="docs"></table>
 </body>
 <script type="text/javascript">
   jQuery.support.cors = true;
+  var head = document.getElementById('head');
+  var docs = document.getElementById('docs');
 
   new Doctape({
 
@@ -23,19 +26,17 @@
   }).run(function () {
 
     this.getAccount(function (acc) {
-      document.write('<img src="' + acc.avatar + '" />');
-      document.write('<h1>Welcome, ' + acc.username + '!</h1>');
+      head.innerHTML += '<img src="' + acc.avatar + '" />';
+      head.innerHTML += 'Welcome, ' + acc.username + '!';
     });
 
     this.getDocumentList(function (data) {
-      document.write('<table>');
-      document.write('<thead><tr><th>Name</th><th>ID</th></tr></thead>');
-      document.write('<tbody>');
+      docs.innerHTML += '<thead><tr><th>Name</th><th>ID</th></tr></thead>';
+      docs.innerHTML += '<tbody>';
       for (var doc in data) {
-        document.write('<tr><td>' + data[doc].name + '</td><td>' + data[doc].id + '</td></tr>');
+        docs.innerHTML += '<tr><td>' + data[doc].name + '</td><td>' + data[doc].id + '</td></tr>';
       }
-      document.write('</tbody>');
-      document.write('</table>');
+      docs.innerHTML += '</tbody>';
     });
 
   });
