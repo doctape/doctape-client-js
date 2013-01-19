@@ -279,7 +279,7 @@
         }
         return emit.call(self, 'auth.fail', error_msg + ': ' + JSON.stringify(auth.error));
       }
-      return emit.call(self, 'auth.fail', error + ': ' + JSON.stringify(err));
+      return emit.call(self, 'auth.fail', error_msg + ': ' + JSON.stringify(err));
     };
   };
 

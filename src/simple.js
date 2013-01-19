@@ -33,18 +33,20 @@
   };
 
   DoctapeSimple.prototype.useCode = function (code, cb) {
-    var _cb, _this = this;
-    this.core.subscribe('auth.fail', function () {
-      if (typeof _this.onauthfail === 'function') {
-        _this.onauthfail.call(this);
-      }
-    });
-    this.core.subscribe('auth.refresh', (_cb = function () {
+    var _this = this;
+    var _cb = function () {
       _this.core.unsubscribe('auth.refresh', _cb);
       if (typeof cb === 'function') {
         cb.call(_this);
       }
-    }));
+    };
+    this.core.subscribe('auth.fail', function () {
+      _this.core.unsubscribe('auth.refresh', _cb);
+      if (typeof _this.onauthfail === 'function') {
+        _this.onauthfail.call(this);
+      }
+    });
+    this.core.subscribe('auth.refresh', _cb);
     this.core.oauthExchange(code);
   };
 
@@ -73,7 +75,7 @@
     return mkResourceCallbackHandler(function (data) {
       return cb(data);
     });
-  }
+  };
 
   DoctapeSimple.prototype.getAccount = function (cb) {
     this.core.getResource('/account', mkResourceCallbackHandlerForJSON(cb));
