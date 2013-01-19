@@ -62,35 +62,6 @@
 
   // ## Getter / Setter Functions
 
-  var clearScope = DoctapeCore.prototype.clearScope = function () {
-    this.options.scope = [];
-  };
-
-  var setScope = DoctapeCore.prototype.setScope = function (scope_array) {
-    this.options.scope = scope_array;
-  };
-
-  var addScope = DoctapeCore.prototype.addScope = function (scope) {
-    this.options.scope.push(scope);
-  };
-
-  var scope = DoctapeCore.prototype.scope = function () {
-    return this.options.scope;
-  };
-
-  var setCredentials = DoctapeCore.prototype.setCredentials = function (id, secret) {
-    this.options.client_id = id;
-    this.options.client_secret = secret;
-  };
-
-  var clientId = DoctapeCore.prototype.clientId = function () {
-    return this.options.client_id;
-  };
-
-  var clientSecret = DoctapeCore.prototype.clientSecret = function () {
-    return this.options.client_secret;
-  };
-
   var setToken = DoctapeCore.prototype.setToken = function (obj) {
     this._token.type      = obj.token_type;
     this._token.timeout   = obj.expires_in;
