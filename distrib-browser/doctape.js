@@ -1,5 +1,7 @@
 (function () {
 
+  var main = this;
+
   // ## Core Constructor
 
   // The Doctape core module consists of a platform-independent
@@ -55,11 +57,7 @@
   // It may be worthwhile to find a way to also abstract this
   // into the environments.
 
-  if (typeof exports !== 'undefined' && module && module['exports']) {
-    module['exports'] = DoctapeCore;
-  } else {
-    window['DoctapeCore'] = DoctapeCore;
-  }
+  main['DoctapeCore'] = DoctapeCore;
 
 
   // ## Getter / Setter Functions

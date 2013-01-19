@@ -1,6 +1,6 @@
 var repl = require('repl');
 
-global.Doctape = require('../doctape_node.js');
+global.Doctape = require('../distrib-node/doctape.js');
 
 global.dt = new Doctape();
 
