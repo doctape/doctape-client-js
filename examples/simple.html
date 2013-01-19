@@ -13,26 +13,31 @@
 <script type="text/javascript">
   jQuery.support.cors = true;
 
-  window.dt = new Doctape({
-    appType:     'server',
-    appId:       'a6015f8e-9f62-4d08-80fe-8969c53f566b',
-    appSecret:   '6767689e-2f64-4575-b364-37956ca0cda9',
-    callbackURL: 'urn:ietf:wg:oauth:2.0:oob',
+  new Doctape({
+
+    appType:     'client',
+    appId:       '6ca7209c-9250-4073-a927-700d9ccbce33',
+    callbackURL: 'http://localhost:8000/examples/simple.html',
     scope:       ['docs', 'account']
-  });
 
-  dt.onauthfail = function () {
-    console.log('AUTH FAIL!');
-  };
+  }).run(function () {
 
-  function proceed (code) {
-    dt.useCode(code, function () {
-      this.getAccount(function (acc) {
-        console.log(acc);
-      });
+    this.getAccount(function (acc) {
+      document.write('<img src="' + acc.avatar + '" />');
+      document.write('<h1>Welcome, ' + acc.username + '!</h1>');
     });
-  }
 
-  console.log(dt.authURL);
+    this.getDocumentList(function (data) {
+      document.write('<table>');
+      document.write('<thead><tr><th>Name</th><th>ID</th></tr></thead>');
+      document.write('<tbody>');
+      for (var doc in data) {
+        document.write('<tr><td>' + data[doc].name + '</td><td>' + data[doc].id + '</td></tr>');
+      }
+      document.write('</tbody>');
+      document.write('</table>');
+    });
+
+  });
 
 </script>

@@ -32,6 +32,11 @@
 
   };
 
+  /*
+  ** Method for initialization using a previously obtained
+  ** authCode.
+  */
+
   DoctapeSimple.prototype.useCode = function (code, cb) {
     var _this = this;
     var _cb = function () {
@@ -49,6 +54,25 @@
     this.core.subscribe('auth.refresh', _cb);
     this.core.oauthExchange(code);
   };
+
+  /*
+  ** Method for initialization with an implicit token.
+  */
+
+  DoctapeSimple.prototype.useToken = function (token, cb) {
+    var _this = this;
+    this.core.subscribe('auth.fail', function () {
+      if (typeof _this.onauthfail === 'function') {
+        _this.onauthfail.call(this);
+      }
+    });
+    this.core.setToken({
+      token_type:   'Bearer',
+      expires_in:   3600,
+      access_token: token
+    });
+    cb.call(this);
+  }
 
   var mkResourceCallbackHandler = function (cb) {
     return function (err, data) {
@@ -83,6 +107,14 @@
 
   DoctapeSimple.prototype.getAvatar = function (size, cb) {
     this.core.getResource('/account/avatar/' + size, mkResourceCallbackHandlerForBinary(cb));
+  };
+
+  DoctapeSimple.prototype.getDocumentList = function (cb) {
+    this.core.getResource('/doc?include_meta=false', mkResourceCallbackHandlerForJSON(cb));
+  };
+
+  DoctapeSimple.prototype.getDocumentListWithMetadata = function (cb) {
+    this.core.getResource('/doc?include_meta=true', mkResourceCallbackHandlerForJSON(cb));
   };
 
 }).call(this);

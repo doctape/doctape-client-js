@@ -342,165 +342,114 @@
     this.env.unsubscribe(ev, fn);
   };
 
+}).call(this);(function () {
 
-  // ## API functions
+  // ## Simple Constructor
 
-  // What follows are functions as a frontend to our API.
-  // When working with this client, please only use these functions
-  // and don't depend on the lower-level architecture.
+  // The DoctapeSimple class holds the DoctapeCore object
+  // and exposes just a few simple methods.
 
-  /**
-   * Fetch Account Data, returns `cb(err, jsonData)`.
-   *
-   * @param {function (Object, Object=)} cb
-   */
-  DoctapeCore.prototype.account = function (cb) {
-    getResource.call(this, '/account',
-                       function (err, data) {
-      if (err) { return cb(err); }
-      data = JSON.parse(data);
-      if (data.error) {
-        return cb(data.error);
+  var DoctapeSimple = this['DoctapeSimple'] = function (config) {
+
+    if (typeof config      !== 'object'  ||
+        config.scope       === undefined ||
+        config.appType     === undefined ||
+        config.appId       === undefined ||
+        config.callbackURL === undefined) {
+      throw 'Incomplete Doctape Configuration!';
+    }
+
+    if (config.appType !== 'server' &&
+        config.appType !== 'client') {
+      throw 'Invalid App Type!';
+    }
+
+    var core = this.core = new DoctapeCore();
+    core.options.scope         = config.scope;
+    core.options.client_id     = config.appId;
+    core.options.client_secret = config.appSecret || null;
+
+    this.authURL = core.authUrl(config.callbackURL,
+                                (config.appType === 'server') ? 'code' : 'token');
+
+    this.onauthfail = null;
+
+  };
+
+  DoctapeSimple.prototype.useCode = function (code, cb) {
+    var _cb, _this = this;
+    this.core.subscribe('auth.fail', function () {
+      if (typeof _this.onauthfail === 'function') {
+        _this.onauthfail.call(this);
       }
-      return cb(null, data.result);
+    });
+    this.core.subscribe('auth.refresh', (_cb = function () {
+      _this.core.unsubscribe('auth.refresh', _cb);
+      if (typeof cb === 'function') {
+        cb.call(_this);
+      }
+    }));
+    this.core.oauthExchange(code);
+  };
+
+  var mkResourceCallbackHandler = function (cb) {
+    return function (err, data) {
+      if (err) {
+        throw err.toString();
+      } else {
+        return cb(data);
+      }
+    };
+  }
+
+  var mkResourceCallbackHandlerForJSON = function (cb) {
+    return mkResourceCallbackHandler(function (data) {
+      json = JSON.parse(data);
+      if (json.error) {
+        throw json.error.toString();
+      } else {
+        return cb(json.result);
+      }
     });
   };
 
-  /**
-   * Fetch Documentlist, returns `cb(err, jsonData)`.
-   *
-   * @param {function (Object, Object=)} cb
-   */
-  DoctapeCore.prototype.list = function (cb) {
-    getResource.call(this, '/doc',
-                       function (err, data) {
-      if (err) { return cb(err); }
-      data = JSON.parse(data);
-      if (data.error) {
-        return cb(data.error);
-      }
-      return cb(null, data.result);
+  var mkResourceCallbackHandlerForBinary = function (cb) {
+    return mkResourceCallbackHandler(function (data) {
+      return cb(data);
     });
+  }
+
+  DoctapeSimple.prototype.getAccount = function (cb) {
+    this.core.getResource('/account', mkResourceCallbackHandlerForJSON(cb));
   };
 
-  /**
-   * Fetch Document data, returns `cb(err, docData)
-   *
-   * @param {Object} docId
-   * @param {function (Object, Object=)} cb
-   */
-  DoctapeCore.prototype.get = function (docId, cb) {
-    getResource.call(this, '/doc/' + docId,
-                       function (err, data) {
-      if (err) { return cb(err); }
-      data = JSON.parse(data);
-      if (data.error) {
-        return cb(data.error);
-      }
-      return cb(null, data.result);
-    });
+  DoctapeSimple.prototype.getAvatar = function (size, cb) {
+    this.core.getResource('/account/avatar/' + size, mkResourceCallbackHandlerForBinary(cb));
   };
 
-  /**
-   *
-   * Download `filename` of given `docId`, put content in (cb);
-   *
-   * @param {string} docId
-   * @param {string} filename
-   * @param {function (Object, Object=)} cb
-   */
-  DoctapeCore.prototype.download = function (docId, filename, cb) {
-    getResource.call(this, '/doc/' + docId + '/' + filename,
-                       function (err, data) {
-      if (err) { return cb(err); }
-      return cb(null, data);
-    });
-  };
-
-  /**
-   *
-   * Update `docId` with `params`
-   *
-   * @param {Object} docId
-   * @param {Object} params
-   * @param {function (Object, Object=)} cb
-   */
-  DoctapeCore.prototype.update = function (docId, params, cb) {
-    postResource.call(this, '/doc/' + docId,
-                        params,
-                        function (err, data) {
-      if (err) { return cb(err); }
-      data = JSON.parse(data);
-      if (data.error) {
-        return cb(data.error);
-      }
-      return cb(null, data.result);
-    });
-  };
-  
-  /**
-   * Destroy given docId
-   *
-   * @param {Object} docId
-   * @param {function (Object, Object=)} cb
-   */
-  DoctapeCore.prototype.destroy = function (docId, cb) {
-    deleteResource.call(this, '/doc/' + docId,
-                          function (err, data) {
-      if (err) { return cb(err); }
-      data = JSON.parse(data);
-      if (data.error) {
-        return cb(data.error);
-      }
-      return cb(null, data.result);
-    });
-  };
-  
-  /**
-   *
-   *
-   *
-   * @param {Object} docId
-   * @param {Object} state
-   * @param {function (Object, Object=)} cb
-   */
-  DoctapeCore.prototype.setPublic = function (docId, state, cb) {
-    postResource.call(this, '/doc/' + docId + '/public',
-                        {'public': state},
-                        function (err, data) {
-      if (err) { return cb(err); }
-      data = JSON.parse(data);
-      if (data.error) {
-        return cb(data.error);
-      }
-      return cb(null, data.result);
-    });
-  };
-
-}).call(this);window.Doctape = function () {
+}).call(this);window.Doctape = function (config) {
 
   // jQuery is already here with name jQuery, dont load it
   if (!jQuery) {
-    alert("Jquery not loaded!");
-    return;
+    throw "JQuery not loaded!";
   }
 
-  var self = new DoctapeCore();
-  self.prototype = DoctapeCore;
+  var self = new DoctapeSimple(config);
+  self.prototype = DoctapeSimple;
 
-  self.env.emit = function (event, data) {
+  self.core.env.emit = function (event, data) {
     $('body').trigger(event, [data]);
   };
 
-  self.env.subscribe = function (event, fn) {
+  self.core.env.subscribe = function (event, fn) {
     $('body').bind(event, fn);
   };
 
-  self.env.unsubscribe = function (event, fn) {
+  self.core.env.unsubscribe = function (event, fn) {
     $('body').unbind(event, fn);
   };
 
-  self.env.req = function (options, cb) {
+  self.core.env.req = function (options, cb) {
     var ajaxOptions = {
       url: options.protocol + '://' + options.host +
            (options.port ? ':' + options.port : '') + options.path,

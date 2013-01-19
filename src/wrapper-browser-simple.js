@@ -41,6 +41,16 @@ window.Doctape = function (config) {
     });
   };
 
+  self.run = function (cb) {
+    var token;
+    try { token = window.location.hash.match(/access_token=([a-z0-9\-]+)/)[1]; } catch (e) {};
+    if (!token) {
+      window.location = self.authURL;
+    } else {
+      self.useToken(token, cb);
+    }
+  }
+
   return self;
 
 };
