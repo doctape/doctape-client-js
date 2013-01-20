@@ -16,20 +16,103 @@ Just include `distrib-browser/doctape.js` in your web project.
 
 ## Usage
 
-The first step in using the library is creating an instance of the `Doctape` prototype and setting it up via `setScope(array)` and `setCredentials(id, secret)`.
+### Client-Type Apps
 
-Then you may retrieve an authorization code via the OAuth endpoint. You can do so via the [Passport](http://passportjs.org/guide/) Provider we created, or by directing your users to the URL returned by `authUrl()` (to which you can optionally pass a redirect_uri parameter).
+When creating a single-page javascript app that should use the Doctape API, you create a new `Doctape`-object using the configuration from the Doctape Developer Center.
 
-Once you are in possession of such authorization code, you use it as a parameter to `oauthExchange(code)`, which will perform an OAuth token exchange and save the retrieved token in your object. If this procedure fails, an `auth.fail` w/ error data, otherwise an `auth.refresh` event w/ the token data will be emitted.
+After that, you can call the method `use`, passing it a function that will be bound to the Doctape object once it retrieved a valid access token. In that function you are able to make resource method calls:
 
-You may subscribe and unsubscribe to these events either via means of your platform-capabilities, or use the `subscribe` and `unsubscribe` methods.
+    Doctape({
 
-If the exchange procedure was successful, you can use the resource methods to access the data provided by our API. Every call will itself check if the token is still valid, and, if not, try to request one anew. This means that the `auth.*` events may potentially be fired at every method call.
+      appType:     'client',
+      appId:       '6ca7209c-9250-4073-a927-700d9ccbce33',
+      callbackURL: 'http://localhost:8000/examples/client.html',
+      scope:       ['docs', 'account']
 
-If you wish to perform an action not provided by this library, you may:
+    }).run(function () {
 
-- Either: Use `getResource`, `postResource` and `deleteResource` methods to perform authorized network requests to resources. See section *Contributing* / *Extending the set of resource methods* for more information. If you think your addition may be useful to others, please consider issuing a Pull Request to us.
-- Or: Use the method `withValidAccessToken` to execute a function retrieving as parameter a valid access token.
+      this.getAccount(function (acc) {
+        document.write('Welcome, ' + acc.username + '!');
+      });
+
+    });
+
+The available resource methods are documented in the sub-section *Resource Methods*.
+
+If you are, for any reason, building a client-type app which is not a single-page javascript app (but really - you shouldn't) and/or already retrieved your token via the Implicit Grant OAuth flow, you can instead of `run` use the `useToken` method like this:
+
+    Doctape({
+
+      appType:     'client',
+      appId:       '6ca7209c-9250-4073-a927-700d9ccbce33',
+      callbackURL: 'http://localhost:8000/examples/client.html',
+      scope:       ['docs', 'account']
+
+    }).useToken(implicit_grant_access_token, function () {
+
+      this.getAccount(function (acc) {
+        // …;
+      });
+
+    });
+
+### Server-Type Apps
+
+When using this library in a Server-Type app, you'll first create a `Doctape`-object from the config you received in the Doctape Developer Center:
+
+    var dt = Doctape({
+
+      appType:     'server',
+      appId:       'a6015f8e-9f62-4d08-80fe-8969c53f566b',
+      appSecret:   '6767689e-2f64-4575-b364-37956ca0cda9',
+      callbackURL: 'http://example.org/',
+      scope:       ['docs', 'account']
+ 
+    });
+
+After that, you have to redirect your users to the URL stored the objects `authURL` property. Through that, your flow will continue on the page pointed to by the `callbackURL` parameter, retrieving as url query part an authorization code. Using that code, you call the method `useCode`, passing it a function that will be bound to the Doctape object once it retrieved a valid access token. In that function you are able to make resource method calls:
+
+    dt.useCode(authorization_code, function () {
+
+      this.getAccount(function (acc) {
+      	// …;
+      });
+
+    });
+
+### Resource Methods
+
+You'll find more information concerning the JSON object structures in the Doctape Developer Center.
+
+#### Account
+- `getAccount (cb)` passes the callback a JSON structure containing the account data of the currently logged-in user.
+- `getAvatar (cb)` passes the callback a string of binary image data representing the users avatar.
+
+#### Multiple Documents
+- `getDocumentList (cb)` passes the callback a JSON object containing a list of all documents.
+- `getDocumentListWithMetadata (cb)` passes the callback a JSON object containing a list of all documents, enriched with metadata.
+
+#### Specific Document
+- `getDocumentInfo (id, cb)` passes the callback a JSON structure with information about the document given by `id`.
+- `setDocumentInfo (id, info, cb)` sets the information `info` of the document given by `id`, passes the callback the updated information as a JSON object.
+- `setDocumentTags (id, tags, cb)` sets the tags of the document given by `id` to the list `tags`, passes the callback the updated information as a JSON object.
+- `setDocumentName (id, name, cb)` sets the name of the document given by `id` to the string given by `name`, passes the callback the updated information as a JSON object.
+- `getDocumentOriginal (id, cb)` passes the callback binary data representing the original data of the document given by `id`.
+- `getDocumentThumbnail (id, cb)` passes the callback binary data representing a thumbnail (jpg, 120px) of the document given by `id`.
+- `getDocumentThumbnailLarge (id, cb)` passes the callback binary data representing a thumbnail (jpg, 320px) of the document given by `id`.
+- `cloneDocument (id, cb)` clones the document given by `id`, passes the callback a JSON object containing the cloned documents id.
+- `setDocumentPublicState (id, state, cb)` sets the published-state of the document given by `id` to true/false according to `state`, passes the callback a JSON object containing the new state and the public url.
+- `publishDocument (id, cb)` publishes the document given by `id`, passes the callback a JSON object containing the new public state and the public url.
+- `unpublishDocument (id, cb)` unpublishes the document given by `id`, passes the callback a JSON object containing the new public state and the public url.
+- `deleteDocument (id, cb)` deletes the object given by `id`, passes the callback a JSON object indicating the success.
+- `extractArchiveContents (id, cb)` extracts the contents of the archive-type document given by `id`, passes the callback a JSON object indicating the success.
+
+### Error Handling
+
+In case the authorization fails, the function registered as `onauthfail` will be called:
+
+    var dt = Doctape(…);
+    dt.onauthfail = function () {…};
 
 
 ## Testing
@@ -56,15 +139,15 @@ The library consist of a core module, and several platform-dependent wrappers, c
 
 ### Core Module
 
-The core-module (`DoctapeCore` in `doctape.js`) contains the infrastructure for authenticating with the doctape OAuth server and then performing authorized calls against the API.
+The core-module (`DoctapeCore` in `core.js`) contains the infrastructure for authenticating with the doctape OAuth server and then performing authorized calls against the API.
 
-Furthermore it provides several methods which map to HTTP resources exposed by the API. These are documented in the section *Usage*.
+### Simple Module
 
-_These resource methods are at this point incomplete_, but new ones can be added with ease. See section *Contributing* for more information.
+This (`DoctapeSimple` in `simple.js`) is currently the main interface to the code module, providing methods for easily working with the resources provided by the Doctape API.
 
 ### Wrappers
 
-Platform-dependent wrappers (`doctape_*.js`, currently only `doctape_node.js` and `doctape_browser.js`) enrich the core-module with an event-infrastructure providing methods for emitting, and (un)subscribing from, events as well as a method for performing HTTP(S) requests.
+Platform-dependent wrappers (`wrapper-*.js`, currently only `wrapper-node.js` and `wrapper-browser.js`) enrich the simple- and core-modules with an event-infrastructure providing methods for emitting, and (un)subscribing from, events as well as a method for performing HTTP(S) requests.
 
 When using this library on a platform which is neither of the two, it is easy to write and plug-in another submodule. See section *Contributing* for more information.
 
@@ -79,14 +162,12 @@ We gladly accept Issues as well as Pull Requests via our [GitHub Repository](htt
 
 The current set of methods mapping to resources on our API is incomplete. A documentation of all our API resources can be found in the [doctape devcenter](https://developer.doctape.com/resources).
 
-When creating a new wrapper-method one uses the methods `getResource`, `postResource` and `deleteResource` all of which accept a string indicating API endpoint (i.e. `/doc`) and a callback function in the form of (`function cb(err, data)`). When the callback is called, the data may be `JSON.parse`d and, if the field `data.error` is not set, the data can be evaluated.
+When creating a new wrapper-method one uses the methods `getResource`, `postResource` and `deleteResource` all of which accept a string indicating API endpoint (i.e. `/doc`) and a callback function in the form of (`function cb (err, data)`). When the callback is called, the data may be `JSON.parse`d and, if the field `data.error` is not set, the data can be evaluated.
 
 The structure of the JSON data can be examined in the [doctape devcenter](https://developer.doctape.com/resources), also.
 
-See `doctape.js`, from line 319 on, for examples.
-
 ### Creating a wrapper for a new platform
 
-A wrapper should subclass the `DoctapeCore` module and add its specific methods as mixins into the `env` object.
+A wrapper should subclass the `DoctapeSimple` module and add its specific methods as mixins into the `core.env` object.
 
-See `doctape_node.js` and `doctape_browser.js` for examples.
+See `wrapper-node.js` and `wrapper-browser.js` for examples.
