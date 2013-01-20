@@ -115,4 +115,56 @@
     this.core.getResource('/doc?include_meta=true', mkResourceCallbackHandlerForJSON(cb));
   };
 
+  DoctapeSimple.prototype.getDocumentInfo = function (id, cb) {
+    this.core.getResource('/doc/' + id, mkResourceCallbackHandlerForJSON(cb));
+  };
+
+  DoctapeSimple.prototype.setDocumentInfo = function (id, data, cb) {
+    this.core.postResource('/doc/' + id, data, mkResourceCallbackHandlerForJSON(cb));
+  };
+
+  DoctapeSimple.prototype.setDocumentTags = function (id, tags, cb) {
+    this.setDocumentInfo(id, {tags: tags}, cb);
+  };
+
+  DoctapeSimple.prototype.setDocumentName = function (id, name, cb) {
+    this.setDocumentInfo(id, {name: name}, cb);
+  };
+
+  DoctapeSimple.prototype.getDocumentOriginal = function (id, cb) {
+    this.core.getResource('/doc/' + id + '/original', mkResourceCallbackHandlerForBinary(cb));
+  };
+
+  DoctapeSimple.prototype.getDocumentThumbnail = function (id, cb) {
+    this.core.getResource('/doc/' + id + '/thumb_120.jpg', mkResourceCallbackHandlerForBinary(cn));
+  };
+
+  DoctapeSimple.prototype.getDocumentThumbnailLarge = function (id, cb) {
+    this.core.getResource('/doc/' + id + '/thumb_320.jpg', mkResourceCallbackHandlerForBinary(cb));
+  };
+
+  DoctapeSimple.prototype.cloneDocument = function (id, cb) {
+    this.core.postResource('/doc/' + id + '/clone', mkResourceCallbackHandlerForJSON(cb));
+  };
+
+  DoctapeSimple.prototype.setDocumentPublicState = function (id, state, cb) {
+    this.core.postResource('/doc/' + id + '/public', {public: state}, mkResourceCallbackHandlerForJSON(cb));
+  }
+
+  DoctapeSimple.prototype.publishDocument = function (id, cb) {
+    this.setDocumentPublicState(id, true, cb);
+  };
+
+  DoctapeSimple.prototype.unpublishDocument = function (id, cb) {
+    this.setDocumentPublicState(id, false, cb);
+  };
+
+  DoctapeSimple.prototype.deleteDocument = function (id, cb) {
+    this.core.deleteResource('/doc/' + id, mkResourceCallbackHandlerForJSON(cb));
+  };
+
+  DoctapeSimple.prototype.extractArchiveContents = function (id, cb) {
+    this.core.postResource('/doc/' + id + '/extract', mkResourceCallbackHandlerForJSON(cb));
+  };
+
 }).call(this);
