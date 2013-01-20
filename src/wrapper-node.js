@@ -3,30 +3,28 @@ var events = require('events');
 var http   = require('http');
 var https  = require('https');
 
-var DoctapeCore = this.DoctapeCore;
+var DoctapeSimple = this.DoctapeSimple;
 
-var Doctape = module.exports = function () {
+var Doctape = module.exports = function (config) {
 
-  var self = new DoctapeCore();
-  self.prototype = DoctapeCore;
+  var self = new DoctapeSimple(config);
+  self.prototype = DoctapeSimple;
 
-  self.env.isNode = true;
+  var emitter = new events.EventEmitter();
 
-  self.env.emitter = new events.EventEmitter();
-
-  self.env.emit = function (event, data) {
-    self.env.emitter.emit(event, data);
+  self.core.env.emit = function (event, data) {
+    emitter.emit(event, data);
   };
 
-  self.env.subscribe = function (event, fn) {
-    self.env.emitter.addListener(event, fn);
+  self.core.env.subscribe = function (event, fn) {
+    emitter.addListener(event, fn);
   };
 
-  self.env.unsubscribe = function (event, fn) {
-    self.env.emitter.removeListener(event, fn);
+  self.core.env.unsubscribe = function (event, fn) {
+    emitter.removeListener(event, fn);
   };
 
-  self.env.req = function (options, cb) {
+  self.core.env.req = function (options, cb) {
 
     var mod = (options.protocol === 'http') ? http : https;
     options.protocol = undefined;

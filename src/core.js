@@ -1,17 +1,12 @@
 (function () {
 
-  var main = this;
-
   // ## Core Constructor
 
   // The Doctape core module consists of a platform-independent
-  // DoctapeCore-class which holds the configuration and owns also
-  // the platform-independent front-end functions.
+  // DoctapeCore-class which holds the configuration and performs
+  // the OAuth procedures.
 
-  /** @constructor */
-  var DoctapeCore = function () {
-
-    // The API configuration is currently hard-coded.
+  var DoctapeCore = this['DoctapeCore'] = function () {
 
     this.options = {
       authPt: {
@@ -53,43 +48,8 @@
 
   };
 
-  // We currently use this to register with the top-level.
-  // It may be worthwhile to find a way to also abstract this
-  // into the environments.
-
-  main['DoctapeCore'] = DoctapeCore;
-
 
   // ## Getter / Setter Functions
-
-  var clearScope = DoctapeCore.prototype.clearScope = function () {
-    this.options.scope = [];
-  };
-
-  var setScope = DoctapeCore.prototype.setScope = function (scope_array) {
-    this.options.scope = scope_array;
-  };
-
-  var addScope = DoctapeCore.prototype.addScope = function (scope) {
-    this.options.scope.push(scope);
-  };
-
-  var scope = DoctapeCore.prototype.scope = function () {
-    return this.options.scope;
-  };
-
-  var setCredentials = DoctapeCore.prototype.setCredentials = function (id, secret) {
-    this.options.client_id = id;
-    this.options.client_secret = secret;
-  };
-
-  var clientId = DoctapeCore.prototype.clientId = function () {
-    return this.options.client_id;
-  };
-
-  var clientSecret = DoctapeCore.prototype.clientSecret = function () {
-    return this.options.client_secret;
-  };
 
   var setToken = DoctapeCore.prototype.setToken = function (obj) {
     this._token.type      = obj.token_type;
@@ -259,7 +219,7 @@
         unsubscribe.call(self, 'auth.refresh', on_refresh);
       };
       subscribe.call(this, 'auth.refresh', on_refresh);
-      oauthRefresh.call(this);
+      refresh.call(this);
     }
   };
 
@@ -279,7 +239,7 @@
         }
         return emit.call(self, 'auth.fail', error_msg + ': ' + JSON.stringify(auth.error));
       }
-      return emit.call(self, 'auth.fail', error + ': ' + JSON.stringify(err));
+      return emit.call(self, 'auth.fail', error_msg + ': ' + JSON.stringify(err));
     };
   };
 
@@ -289,7 +249,7 @@
    *
    * @param {string} code
    */
-  var oauthExchange = DoctapeCore.prototype.oauthExchange = function (code) {
+  var exchange = DoctapeCore.prototype.exchange = function (code) {
     if (this._lock_refresh === undefined) {
       this._lock_refresh = true;
       postAuth.call(this, '/token',
@@ -306,7 +266,7 @@
    * Get a new access token by using the already-received refresh
    * token.
    */
-  var oauthRefresh = DoctapeCore.prototype.oauthRefresh = function () {
+  var refresh = DoctapeCore.prototype.refresh = function () {
     if (this._lock_refresh === undefined) {
       this._lock_refresh = true;
       postAuth.call(this, '/token',
@@ -340,141 +300,6 @@
    */
   var unsubscribe = DoctapeCore.prototype.unsubscribe = function (ev, fn) {
     this.env.unsubscribe(ev, fn);
-  };
-
-
-  // ## API functions
-
-  // What follows are functions as a frontend to our API.
-  // When working with this client, please only use these functions
-  // and don't depend on the lower-level architecture.
-
-  /**
-   * Fetch Account Data, returns `cb(err, jsonData)`.
-   *
-   * @param {function (Object, Object=)} cb
-   */
-  DoctapeCore.prototype.account = function (cb) {
-    getResource.call(this, '/account',
-                       function (err, data) {
-      if (err) { return cb(err); }
-      data = JSON.parse(data);
-      if (data.error) {
-        return cb(data.error);
-      }
-      return cb(null, data.result);
-    });
-  };
-
-  /**
-   * Fetch Documentlist, returns `cb(err, jsonData)`.
-   *
-   * @param {function (Object, Object=)} cb
-   */
-  DoctapeCore.prototype.list = function (cb) {
-    getResource.call(this, '/doc',
-                       function (err, data) {
-      if (err) { return cb(err); }
-      data = JSON.parse(data);
-      if (data.error) {
-        return cb(data.error);
-      }
-      return cb(null, data.result);
-    });
-  };
-
-  /**
-   * Fetch Document data, returns `cb(err, docData)
-   *
-   * @param {Object} docId
-   * @param {function (Object, Object=)} cb
-   */
-  DoctapeCore.prototype.get = function (docId, cb) {
-    getResource.call(this, '/doc/' + docId,
-                       function (err, data) {
-      if (err) { return cb(err); }
-      data = JSON.parse(data);
-      if (data.error) {
-        return cb(data.error);
-      }
-      return cb(null, data.result);
-    });
-  };
-
-  /**
-   *
-   * Download `filename` of given `docId`, put content in (cb);
-   *
-   * @param {string} docId
-   * @param {string} filename
-   * @param {function (Object, Object=)} cb
-   */
-  DoctapeCore.prototype.download = function (docId, filename, cb) {
-    getResource.call(this, '/doc/' + docId + '/' + filename,
-                       function (err, data) {
-      if (err) { return cb(err); }
-      return cb(null, data);
-    });
-  };
-
-  /**
-   *
-   * Update `docId` with `params`
-   *
-   * @param {Object} docId
-   * @param {Object} params
-   * @param {function (Object, Object=)} cb
-   */
-  DoctapeCore.prototype.update = function (docId, params, cb) {
-    postResource.call(this, '/doc/' + docId,
-                        params,
-                        function (err, data) {
-      if (err) { return cb(err); }
-      data = JSON.parse(data);
-      if (data.error) {
-        return cb(data.error);
-      }
-      return cb(null, data.result);
-    });
-  };
-  
-  /**
-   * Destroy given docId
-   *
-   * @param {Object} docId
-   * @param {function (Object, Object=)} cb
-   */
-  DoctapeCore.prototype.destroy = function (docId, cb) {
-    deleteResource.call(this, '/doc/' + docId,
-                          function (err, data) {
-      if (err) { return cb(err); }
-      data = JSON.parse(data);
-      if (data.error) {
-        return cb(data.error);
-      }
-      return cb(null, data.result);
-    });
-  };
-  
-  /**
-   *
-   *
-   *
-   * @param {Object} docId
-   * @param {Object} state
-   * @param {function (Object, Object=)} cb
-   */
-  DoctapeCore.prototype.setPublic = function (docId, state, cb) {
-    postResource.call(this, '/doc/' + docId + '/public',
-                        {'public': state},
-                        function (err, data) {
-      if (err) { return cb(err); }
-      data = JSON.parse(data);
-      if (data.error) {
-        return cb(data.error);
-      }
-      return cb(null, data.result);
-    });
   };
 
 }).call(this);
