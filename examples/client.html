@@ -2,28 +2,43 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <script src="http://code.jquery.com/jquery-1.6.1.js"></script>
-  <script src="../doctape.js"></script>
-  <script src="../doctape_browser.js"></script>
+  <script src="../src/core.js"></script>
+  <script src="../src/simple.js"></script>
+  <script src="../src/wrapper-browser.js"></script>
   <title>doctape API Test Examples</title>
 </head>
 <body>
-
+<h1 id="head"></h1>
+<table id="docs"></table>
 </body>
 <script type="text/javascript">
   jQuery.support.cors = true;
+  var head = document.getElementById('head');
+  var docs = document.getElementById('docs');
 
-  window.dt = new Doctape();
+  Doctape({
 
-  dt.setScope(['docs', 'account']);
-  dt.setCredentials(null /* INSERT CLIENT ID HERE */,
-                    null /* INSERT CLIENT SECRET HERE */)
+    appType:     'client',
+    appId:       '6ca7209c-9250-4073-a927-700d9ccbce33',
+    callbackURL: 'http://localhost:8000/examples/client.html',
+    scope:       ['docs', 'account']
 
-  dt.subscribe('auth.fail', function (ev, err) {
-    console.log('Auth fail', err);
+  }).run(function () {
+
+    this.getAccount(function (acc) {
+      head.innerHTML += '<img src="' + acc.avatar + '" />';
+      head.innerHTML += 'Welcome, ' + acc.username + '!';
+    });
+
+    this.getDocumentList(function (data) {
+      docs.innerHTML += '<thead><tr><th>Name</th><th>ID</th></tr></thead>';
+      docs.innerHTML += '<tbody>';
+      for (var doc in data) {
+        docs.innerHTML += '<tr><td>' + data[doc].name + '</td><td>' + data[doc].id + '</td></tr>';
+      }
+      docs.innerHTML += '</tbody>';
+    });
+
   });
 
-  dt.subscribe('auth.refresh', function (ev, token) {
-    console.log('Auth refresh: ' + JSON.stringify(token));
-  });
-    
 </script>
