@@ -1,27 +1,26 @@
-window.Doctape = function () {
+window.Doctape = function (config) {
 
   // jQuery is already here with name jQuery, dont load it
   if (!jQuery) {
-    alert("Jquery not loaded!");
-    return;
+    throw "JQuery not loaded!";
   }
 
-  var self = new DoctapeCore();
-  self.prototype = DoctapeCore;
+  var self = new DoctapeSimple(config);
+  self.prototype = DoctapeSimple;
 
-  self.env.emit = function (event, data) {
+  self.core.env.emit = function (event, data) {
     $('body').trigger(event, [data]);
   };
 
-  self.env.subscribe = function (event, fn) {
+  self.core.env.subscribe = function (event, fn) {
     $('body').bind(event, fn);
   };
 
-  self.env.unsubscribe = function (event, fn) {
+  self.core.env.unsubscribe = function (event, fn) {
     $('body').unbind(event, fn);
   };
 
-  self.env.req = function (options, cb) {
+  self.core.env.req = function (options, cb) {
     var ajaxOptions = {
       url: options.protocol + '://' + options.host +
            (options.port ? ':' + options.port : '') + options.path,
@@ -41,6 +40,20 @@ window.Doctape = function () {
       return cb(err);
     });
   };
+
+  self.run = function (cb) {
+    var token;
+    try { token = window.location.hash.match(/access_token=([a-z0-9\-]+)/)[1]; } catch (e) {};
+    if (!token) {
+      window.location = self.authURL;
+    } else {
+      self.useToken({
+        token_type:   'Bearer',
+        expires_in:   3600,
+        access_token: token
+      }, cb);
+    }
+  }
 
   return self;
 
