@@ -72,112 +72,116 @@
     cb.call(this);
   }
 
-  var mkResourceCallbackHandler = function (cb) {
+  var mkResourceCallbackHandler = function (cb, errcb, handler) {
     return function (err, data) {
-      if (err) {
-        throw err.toString();
-      } else {
-        return cb(data);
+      try {
+        if (!err && typeof handler === 'function') data = handler(data)
+        else throw err.toString();
+      } catch (e) {
+        if (typeof errcb === 'function') errcb(e);
+        else throw e;
       }
+      if (typeof cb === 'function') cb(data);
+      else if (typeof errcb === 'function') errcb(null,  data);
     };
   }
 
-  var mkResourceCallbackHandlerForJSON = function (cb) {
-    return mkResourceCallbackHandler(function (data) {
+  var mkResourceCallbackHandlerForJSON = function (cb, errcb) {
+    return mkResourceCallbackHandler(cb, errcb, function (data) {
       json = JSON.parse(data);
       if (json.error) {
         throw json.error.toString();
       } else {
-        return cb(json.result);
+        return json.result;
       }
     });
   };
 
-  var mkResourceCallbackHandlerForBinary = function (cb) {
-    return mkResourceCallbackHandler(function (data) {
-      return cb(data);
+  var mkResourceCallbackHandlerForBinary = function (cb, errcb) {
+    return mkResourceCallbackHandler(cb, errcb, function (data) {
+      return data;
     });
   };
 
-  DoctapeSimple.prototype.getAccount = function (cb) {
+  DoctapeSimple.prototype.getAccount = function (cb, errcb) {
     this.core.getResource('/account',
-                          mkResourceCallbackHandlerForJSON(cb));
+                          mkResourceCallbackHandlerForJSON(cb, errcb));
   };
 
-  DoctapeSimple.prototype.getAvatar = function (size, cb) {
+  DoctapeSimple.prototype.getAvatar = function (size, cb, errcb) {
     this.core.getResource('/account/avatar/' + size,
-                          mkResourceCallbackHandlerForBinary(cb));
+                          mkResourceCallbackHandlerForBinary(cb, errcb));
   };
 
-  DoctapeSimple.prototype.getDocumentList = function (cb) {
+  DoctapeSimple.prototype.getDocumentList = function (cb, errcb) {
     this.core.getResource('/doc?include_meta=false',
-                          mkResourceCallbackHandlerForJSON(cb));
+                          mkResourceCallbackHandlerForJSON(cb, errcb));
   };
 
-  DoctapeSimple.prototype.getDocumentListWithMetadata = function (cb) {
+  DoctapeSimple.prototype.getDocumentListWithMetadata = function (cb, errcb) {
     this.core.getResource('/doc?include_meta=true',
-                          mkResourceCallbackHandlerForJSON(cb));
+                          mkResourceCallbackHandlerForJSON(cb, errcb));
   };
 
-  DoctapeSimple.prototype.getDocumentInfo = function (id, cb) {
+  DoctapeSimple.prototype.getDocumentInfo = function (id, cb, errcb) {
     this.core.getResource('/doc/' + id,
-                          mkResourceCallbackHandlerForJSON(cb));
+                          mkResourceCallbackHandlerForJSON(cb, errcb));
   };
 
-  DoctapeSimple.prototype.setDocumentInfo = function (id, data, cb) {
+  DoctapeSimple.prototype.setDocumentInfo = function (id, data, cb, errcb) {
     this.core.postResource('/doc/' + id, data,
-                           mkResourceCallbackHandlerForJSON(cb));
+                           mkResourceCallbackHandlerForJSON(cb, errcb));
   };
 
-  DoctapeSimple.prototype.setDocumentTags = function (id, tags, cb) {
-    this.setDocumentInfo(id, {tags: tags}, cb);
+  DoctapeSimple.prototype.setDocumentTags = function (id, tags, cb, errcb) {
+    this.setDocumentInfo(id, {tags: tags}, cb, errcb);
   };
 
-  DoctapeSimple.prototype.setDocumentName = function (id, name, cb) {
-    this.setDocumentInfo(id, {name: name}, cb);
+  DoctapeSimple.prototype.setDocumentName = function (id, name, cb, errcb) {
+    this.setDocumentInfo(id, {name: name}, cb, errcb);
   };
 
-  DoctapeSimple.prototype.getDocumentOriginal = function (id, cb) {
+  DoctapeSimple.prototype.getDocumentOriginal = function (id, cb, errcb) {
     this.core.getResource('/doc/' + id + '/original',
-                          mkResourceCallbackHandlerForBinary(cb));
+                          mkResourceCallbackHandlerForBinary(cb, errcb));
   };
 
-  DoctapeSimple.prototype.getDocumentThumbnail = function (id, cb) {
+  DoctapeSimple.prototype.getDocumentThumbnail = function (id, cb, errcb) {
     this.core.getResource('/doc/' + id + '/thumb_120.jpg',
-                          mkResourceCallbackHandlerForBinary(cn));
+                          mkResourceCallbackHandlerForBinary(cb, errcb));
   };
 
-  DoctapeSimple.prototype.getDocumentThumbnailLarge = function (id, cb) {
+  DoctapeSimple.prototype.getDocumentThumbnailLarge = function (id, cb, errcb) {
     this.core.getResource('/doc/' + id + '/thumb_320.jpg',
-                          mkResourceCallbackHandlerForBinary(cb));
+                          mkResourceCallbackHandlerForBinary(cb, errcb));
   };
 
-  DoctapeSimple.prototype.cloneDocument = function (id, cb) {
+  DoctapeSimple.prototype.cloneDocument = function (id, cb, errcb) {
     this.core.postResource('/doc/' + id + '/clone',
-                           mkResourceCallbackHandlerForJSON(cb));
+                           mkResourceCallbackHandlerForJSON(cb, errcb));
   };
 
-  DoctapeSimple.prototype.setDocumentPublicState = function (id, state, cb) {
+  DoctapeSimple.prototype.setDocumentPublicState = function (id, state, cb, errcb) {
     this.core.postResource('/doc/' + id + '/public', {public: state},
-                           mkResourceCallbackHandlerForJSON(cb));
+                           mkResourceCallbackHandlerForJSON(cb, errcb));
   }
 
-  DoctapeSimple.prototype.publishDocument = function (id, cb) {
-    this.setDocumentPublicState(id, true, cb);
+  DoctapeSimple.prototype.publishDocument = function (id, cb, errcb) {
+    this.setDocumentPublicState(id, true, cb, errcb);
   };
 
-  DoctapeSimple.prototype.unpublishDocument = function (id, cb) {
-    this.setDocumentPublicState(id, false, cb);
+  DoctapeSimple.prototype.unpublishDocument = function (id, cb, errcb) {
+    this.setDocumentPublicState(id, false, cb, errcb);
   };
 
-  DoctapeSimple.prototype.deleteDocument = function (id, cb) {
+  DoctapeSimple.prototype.deleteDocument = function (id, cb, errcb) {
     this.core.deleteResource('/doc/' + id,
-                             mkResourceCallbackHandlerForJSON(cb));
+                             mkResourceCallbackHandlerForJSON(cb, errcb));
   };
 
-  DoctapeSimple.prototype.extractArchiveContents = function (id, cb) {
+  DoctapeSimple.prototype.extractArchiveContents = function (id, cb, errcb) {
     this.core.postResource('/doc/' + id + '/extract',
-                           mkResourceCallbackHandlerForJSON(cb));
+                           mkResourceCallbackHandlerForJSON(cb, errcb));
   };
 
 }).call(this);

@@ -84,30 +84,34 @@ After that, you have to redirect your users to the URL stored the objects `authU
 
 You'll find more information concerning the JSON object structures in the Doctape Developer Center.
 
+To each method you pass specific arguments and one or two callback functions. If the first callback argument is not null, it will get passed the data upon a successful request. Should this request fail, the second callback argument is called with the error, or and exception is thrown if the second callback argument is non-existent. If the first callback argument is null, the second callback argument is expected to accept two node-style arguments (err, data). 
+
 #### Account
-- `getAccount (cb)` passes the callback a JSON structure containing the account data of the currently logged-in user.
-- `getAvatar (cb)` passes the callback a string of binary image data representing the users avatar.
+- `getAccount (cb...)` passes the callback a JSON structure containing the account data of the currently logged-in user.
+- `getAvatar (cb...)` passes the callback a string of binary image data representing the users avatar.
 
 #### Multiple Documents
-- `getDocumentList (cb)` passes the callback a JSON object containing a list of all documents.
-- `getDocumentListWithMetadata (cb)` passes the callback a JSON object containing a list of all documents, enriched with metadata.
+- `getDocumentList (cb...)` passes the callback a JSON object containing a list of all documents.
+- `getDocumentListWithMetadata (cb...)` passes the callback a JSON object containing a list of all documents, enriched with metadata.
 
 #### Specific Document
-- `getDocumentInfo (id, cb)` passes the callback a JSON structure with information about the document given by `id`.
-- `setDocumentInfo (id, info, cb)` sets the information `info` of the document given by `id`, passes the callback the updated information as a JSON object.
-- `setDocumentTags (id, tags, cb)` sets the tags of the document given by `id` to the list `tags`, passes the callback the updated information as a JSON object.
-- `setDocumentName (id, name, cb)` sets the name of the document given by `id` to the string given by `name`, passes the callback the updated information as a JSON object.
-- `getDocumentOriginal (id, cb)` passes the callback binary data representing the original data of the document given by `id`.
-- `getDocumentThumbnail (id, cb)` passes the callback binary data representing a thumbnail (jpg, 120px) of the document given by `id`.
-- `getDocumentThumbnailLarge (id, cb)` passes the callback binary data representing a thumbnail (jpg, 320px) of the document given by `id`.
-- `cloneDocument (id, cb)` clones the document given by `id`, passes the callback a JSON object containing the cloned documents id.
-- `setDocumentPublicState (id, state, cb)` sets the published-state of the document given by `id` to true/false according to `state`, passes the callback a JSON object containing the new state and the public url.
-- `publishDocument (id, cb)` publishes the document given by `id`, passes the callback a JSON object containing the new public state and the public url.
-- `unpublishDocument (id, cb)` unpublishes the document given by `id`, passes the callback a JSON object containing the new public state and the public url.
-- `deleteDocument (id, cb)` deletes the object given by `id`, passes the callback a JSON object indicating the success.
-- `extractArchiveContents (id, cb)` extracts the contents of the archive-type document given by `id`, passes the callback a JSON object indicating the success.
+- `getDocumentInfo (id, cb...)` passes the callback a JSON structure with information about the document given by `id`.
+- `setDocumentInfo (id, info, cb...)` sets the information `info` of the document given by `id`, passes the callback the updated information as a JSON object.
+- `setDocumentTags (id, tags, cb...)` sets the tags of the document given by `id` to the list `tags`, passes the callback the updated information as a JSON object.
+- `setDocumentName (id, name, cb...)` sets the name of the document given by `id` to the string given by `name`, passes the callback the updated information as a JSON object.
+- `getDocumentOriginal (id, cb...)` passes the callback binary data representing the original data of the document given by `id`.
+- `getDocumentThumbnail (id, cb...)` passes the callback binary data representing a thumbnail (jpg, 120px) of the document given by `id`.
+- `getDocumentThumbnailLarge (id, cb...)` passes the callback binary data representing a thumbnail (jpg, 320px) of the document given by `id`.
+- `cloneDocument (id, cb...)` clones the document given by `id`, passes the callback a JSON object containing the cloned documents id.
+- `setDocumentPublicState (id, state, cb...)` sets the published-state of the document given by `id` to true/false according to `state`, passes the callback a JSON object containing the new state and the public url.
+- `publishDocument (id, cb...)` publishes the document given by `id`, passes the callback a JSON object containing the new public state and the public url.
+- `unpublishDocument (id, cb...)` unpublishes the document given by `id`, passes the callback a JSON object containing the new public state and the public url.
+- `deleteDocument (id, cb...)` deletes the object given by `id`, passes the callback a JSON object indicating the success.
+- `extractArchiveContents (id, cb...)` extracts the contents of the archive-type document given by `id`, passes the callback a JSON object indicating the success.
 
 ### Error Handling
+
+
 
 In case the authorization fails, the function registered as `onauthfail` will be called:
 
