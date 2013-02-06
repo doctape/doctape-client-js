@@ -70,21 +70,25 @@
     });
     this.core.setToken(token);
     cb.call(this);
-  }
+  };
 
   var mkResourceCallbackHandler = function (cb, errcb, handler) {
+    var noerr = true;
     return function (err, data) {
       try {
-        if (!err && typeof handler === 'function') data = handler(data)
-        else throw err.toString();
+        if (!err) { data = handler(data); }
+        else      { throw err.toString(); }
       } catch (e) {
-        if (typeof errcb === 'function') errcb(e);
-        else throw e;
+        noerr = false;
+        if (typeof errcb === 'function') { errcb(e); }
+        else { throw e; }
       }
-      if (typeof cb === 'function') cb(data);
-      else if (typeof errcb === 'function') errcb(null,  data);
+      if (noerr) {
+        if (typeof cb === 'function') { cb(data); }
+        else if (typeof errcb === 'function') { errcb(null,  data); }
+      }
     };
-  }
+  };
 
   var mkResourceCallbackHandlerForJSON = function (cb, errcb) {
     return mkResourceCallbackHandler(cb, errcb, function (data) {
