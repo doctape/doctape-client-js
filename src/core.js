@@ -210,7 +210,7 @@
    * @param {function (?string)} fn
    */
   var withValidAccessToken = DoctapeCore.prototype.withValidAccessToken = function (fn) {
-    if (this._token.timestamp + this._token.timeout * 1000 > (new Date()).getTime()) {
+    if (this._token.access && this._token.timestamp + this._token.timeout * 1000 > (new Date()).getTime()) {
       return fn(this._token.access);
     } else {
       var self = this;
@@ -284,7 +284,7 @@
   /**
    * Emit an event.
    */
-  var emit = DoctapeCore.prototype.subscribe = function (ev, data) {
+  var emit = DoctapeCore.prototype.emit = function (ev, data) {
     this.env.emit(ev, data);
   };
 
