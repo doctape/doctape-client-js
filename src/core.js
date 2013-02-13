@@ -77,15 +77,14 @@
     this.options.authPt.base     = parts[4]               || null;
   };
 
-  var authPt = DoctapeCore.prototype.authPt = function () {
+  var authBase = DoctapeCore.prototype.authBase = function () {
     return this.options.authPt.protocol + '://' + this.options.authPt.host +
-           (this.options.authPt.port ? ':' + this.options.authPt.port : '') +
-           this.options.authPt.base;
+           (this.options.authPt.port ? ':' + this.options.authPt.port : '');
   };
 
-  var authUrl = DoctapeCore.prototype.authUrl = function (redirect, type) {
+  var authPath = DoctapeCore.prototype.authPath = function (redirect, type) {
     var uri  = redirect || 'urn:ietf:wg:oauth:2.0:oob';
-    return authPt.call(this) +
+    return this.options.authPt.base +
            '?' + 'response_type=' + (type || 'code') +
            '&' + 'client_id='     + encodeURIComponent(this.options.client_id) +
            '&' + 'scope='         + encodeURIComponent(this.options.scope.join(' ')) +
