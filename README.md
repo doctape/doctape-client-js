@@ -9,7 +9,7 @@ This library manifests a javascript module providing asynchronous method calls a
 The latest stable release is available via `npm install doctape`.
 
 
-## Installing for client side via jQuery
+## Installing for client side
 
 Just include `distrib-browser/doctape.js` in your web project.
 
@@ -130,9 +130,13 @@ There exist several test for the basic infrastructure and OAuth authentication. 
 
 To build the library for npm, just run `make node` from inside the top directory. You'll find the npm package structure in `distrib-node`.
 
+### Browser / Plain
+
+To build a javascript file, run `make browser` and then require `distrib-browser/doctape.js` from your web page.
+
 ### Browser / jQuery
 
-To build a javascript file to include alongside jQuery, run `make browser` and then require `distrib-browser/doctape.js` from your web page.
+To build a javascript file to include alongside jQuery, run `make jquery` and then require `distrib-browser/doctape.jquery.js` from your web page.
 
 
 ## Project Structure
@@ -151,7 +155,7 @@ This (`DoctapeSimple` in `simple.js`) is currently the main interface to the cod
 
 ### Wrappers
 
-Platform-dependent wrappers (`wrapper-*.js`, currently only `wrapper-node.js` and `wrapper-browser.js`) enrich the simple- and core-modules with an event-infrastructure providing methods for emitting, and (un)subscribing from, events as well as a method for performing HTTP(S) requests.
+Platform-dependent wrappers (`wrapper-*.js`, currently only `wrapper-node.js`, `wrapper-browser.js` and `wrapper-browser-jquery.js`) enrich the simple- and core-modules with an event-infrastructure providing methods for emitting, and (un)subscribing from, events as well as a method for performing HTTP(S) requests.
 
 When using this library on a platform which is neither of the two, it is easy to write and plug-in another submodule. See section *Contributing* for more information.
 
