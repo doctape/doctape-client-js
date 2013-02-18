@@ -31,6 +31,8 @@
     this.authPath = core.authPath(config.callbackURL, (config.appType === 'server') ? 'code' : 'token');
     this.authURL = this.authBase + this.authPath;
 
+    this.resourceURL = core.resourcePt();
+
     this.onauthfail = null;
 
   };
@@ -46,6 +48,14 @@
         self.onauthfail();
       }
     });
+  };
+
+  /*
+  ** Map through utility functions.
+  */
+
+  DoctapeSimple.prototype.withValidAccessToken = function (fn) {
+    this.core.withValidAccessToken(fn);
   };
 
   /*
