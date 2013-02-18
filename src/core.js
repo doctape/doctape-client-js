@@ -77,15 +77,14 @@
     this.options.authPt.base     = parts[4]               || null;
   };
 
-  var authPt = DoctapeCore.prototype.authPt = function () {
+  var authBase = DoctapeCore.prototype.authBase = function () {
     return this.options.authPt.protocol + '://' + this.options.authPt.host +
-           (this.options.authPt.port ? ':' + this.options.authPt.port : '') +
-           this.options.authPt.base;
+           (this.options.authPt.port ? ':' + this.options.authPt.port : '');
   };
 
-  var authUrl = DoctapeCore.prototype.authUrl = function (redirect, type) {
+  var authPath = DoctapeCore.prototype.authPath = function (redirect, type) {
     var uri  = redirect || 'urn:ietf:wg:oauth:2.0:oob';
-    return authPt.call(this) +
+    return this.options.authPt.base +
            '?' + 'response_type=' + (type || 'code') +
            '&' + 'client_id='     + encodeURIComponent(this.options.client_id) +
            '&' + 'scope='         + encodeURIComponent(this.options.scope.join(' ')) +
@@ -210,7 +209,7 @@
    * @param {function (?string)} fn
    */
   var withValidAccessToken = DoctapeCore.prototype.withValidAccessToken = function (fn) {
-    if (this._token.timestamp + this._token.timeout * 1000 > (new Date()).getTime()) {
+    if (this._token.access && this._token.timestamp + this._token.timeout * 1000 > (new Date()).getTime()) {
       return fn(this._token.access);
     } else {
       var self = this;
@@ -284,7 +283,7 @@
   /**
    * Emit an event.
    */
-  var emit = DoctapeCore.prototype.subscribe = function (ev, data) {
+  var emit = DoctapeCore.prototype.emit = function (ev, data) {
     this.env.emit(ev, data);
   };
 

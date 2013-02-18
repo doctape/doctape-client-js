@@ -57,6 +57,8 @@ var Doctape = module.exports = function (config) {
 
   };
 
+  self.init();
+
   return self;
 
 };

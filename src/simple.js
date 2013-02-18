@@ -27,11 +27,35 @@
     core.options.client_id     = config.appId;
     core.options.client_secret = config.appSecret || null;
 
-    this.authURL = core.authUrl(config.callbackURL,
-                                (config.appType === 'server') ? 'code' : 'token');
+    this.authBase = core.authBase();
+    this.authPath = core.authPath(config.callbackURL, (config.appType === 'server') ? 'code' : 'token');
+    this.authURL = this.authBase + this.authPath;
+
+    this.resourceURL = core.resourcePt();
 
     this.onauthfail = null;
 
+  };
+
+  /*
+  ** Method to be called from the environment after mixin.
+  */
+
+  DoctapeSimple.prototype.init = function () {
+    var self = this;
+    this.core.subscribe('auth.fail', function () {
+      if (typeof self.onauthfail === 'function') {
+        self.onauthfail();
+      }
+    });
+  };
+
+  /*
+  ** Map through utility functions.
+  */
+
+  DoctapeSimple.prototype.withValidAccessToken = function (fn) {
+    this.core.withValidAccessToken(fn);
   };
 
   /*
@@ -49,9 +73,6 @@
     };
     this.core.subscribe('auth.fail', function () {
       _this.core.unsubscribe('auth.refresh', _cb);
-      if (typeof _this.onauthfail === 'function') {
-        _this.onauthfail.call(this);
-      }
     });
     this.core.subscribe('auth.refresh', _cb);
     this.core.exchange(code);
@@ -62,12 +83,6 @@
   */
 
   DoctapeSimple.prototype.useToken = function (token, cb) {
-    var _this = this;
-    this.core.subscribe('auth.fail', function () {
-      if (typeof _this.onauthfail === 'function') {
-        _this.onauthfail.call(this);
-      }
-    });
     this.core.setToken(token);
     cb.call(this);
   };

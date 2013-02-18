@@ -82,6 +82,8 @@ window.Doctape = function (config) {
     }
   };
 
+  self.init();
+
   return self;
 
 };
