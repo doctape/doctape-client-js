@@ -68,16 +68,24 @@ window.Doctape = function (config) {
     xhr.send();
   };
 
+  var getHashObject = function () {
+    var i, obj = {}, part, parts = window.location.hash.substr(1).split('&');
+    for (i = 0; i < parts.length; i++) {
+      part = parts[i].split('=');
+      obj[decodeURIComponent(part[0])] = decodeURIComponent(part[1]);
+    }
+    return obj;
+  };
+
   self.run = function (cb) {
-    var token;
-    try { token = window.location.hash.match(/access_token=([a-z0-9\-]+)/)[1]; } catch (e) {}
-    if (!token) {
+    var hash = getHashObject();
+    if (typeof hash.access_token === 'undefined' && typeof hash.error === 'undefined') {
       window.location = self.authURL;
     } else {
       self.useToken({
         token_type:   'Bearer',
         expires_in:   3600,
-        access_token: token
+        access_token: hash.access_token
       }, cb);
     }
   };
