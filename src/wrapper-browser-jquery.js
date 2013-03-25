@@ -53,7 +53,7 @@ window.Doctape = function (config) {
   self.run = function (cb) {
     var hash = getHashObject();
     if (typeof hash.access_token === 'undefined' && typeof hash.error === 'undefined') {
-      window.location = self.authURL;
+      window.location = self.authURL + '#state=' + encodeURIComponent(hash.state);
     } else {
       self.useToken({
         token_type:   'Bearer',
