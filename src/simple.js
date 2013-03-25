@@ -54,6 +54,10 @@
   ** Map through utility functions.
   */
 
+  DoctapeSimple.prototype.getValidAccessToken = function () {
+    this.core.getValidAccessToken();
+  };
+  
   DoctapeSimple.prototype.withValidAccessToken = function (fn) {
     this.core.withValidAccessToken(fn);
   };

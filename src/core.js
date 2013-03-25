@@ -204,6 +204,17 @@
   };
 
   /**
+   * Try to get a valid access token, or throw.
+   */
+  var getValidAccessToken = DoctapeCore.prototype.getValidAccessToken = function () {
+    if (this._token.access && this._token.timestamp + this._token.timeout * 1000 > (new Date()).getTime()) {
+      return this._token.access;
+    } else {
+      throw new Error('Access Token Expired');
+    }
+  };
+
+  /**
    * Ensure a valid access token, then continue.
    *
    * @param {function (?string)} fn
