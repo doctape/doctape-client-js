@@ -65,7 +65,7 @@ window.Doctape = function (config) {
         }
       }
     };
-    xhr.send();
+    xhr.send(options.postData);
   };
 
   var getHashObject = function () {
