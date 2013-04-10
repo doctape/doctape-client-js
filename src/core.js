@@ -220,6 +220,7 @@
         'Authorization': 'Bearer ' + this._token.access
       }), function (err, data) {
         if (err) return errorHandler();
+        if (JSON.parse(data).error) return errorHandler();
         fn(self._token.access);
       });
     } else {
