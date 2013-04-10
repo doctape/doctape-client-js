@@ -87,8 +87,9 @@
   */
 
   DoctapeSimple.prototype.useToken = function (token, cb) {
+    var self = this;
     this.core.setToken(token);
-    cb.call(this);
+    this.withValidAccessToken(function () { cb.call(self); })
   };
 
   var mkResourceCallbackHandler = function (cb, errcb, handler) {

@@ -140,6 +140,19 @@
   // These functions will authorize the client on a doctape
   // API server.
 
+  var reqOptions = function (method, endpoint, headers, postData) {
+    var opt = this.options.resourcePt;
+    return {
+      method: method,
+      protocol: opt.protocol,
+      host:     opt.host,
+      port:     opt.port,
+      path:     opt.base + endpoint,
+      headers:  headers,
+      postData: postData
+    }
+  };
+
   /**
    * Perform an authorized GET-request using an access-token.
    *
@@ -149,14 +162,9 @@
   var getResource = DoctapeCore.prototype.getResource = function (endpoint, cb) {
     var self = this;
     withValidAccessToken.call(this, function (token) {
-      self.env.req({
-        method:   'GET',
-        protocol: self.options.resourcePt.protocol,
-        host:     self.options.resourcePt.host,
-        port:     self.options.resourcePt.port,
-        path:     self.options.resourcePt.base + endpoint,
-        headers:  {'Authorization': 'Bearer ' + token}
-      }, cb);
+      self.env.req(reqOptions.call(self, 'GET', endpoint, {
+        'Authorization': 'Bearer ' + token
+      }), cb);
     });
   };
 
@@ -170,16 +178,10 @@
   var postResource = DoctapeCore.prototype.postResource = function (endpoint, data, cb) {
     var self = this;
     withValidAccessToken.call(this, function (token) {
-      self.env.req({
-        method:   'POST',
-        protocol: self.options.resourcePt.protocol,
-        host:     self.options.resourcePt.host,
-        port:     self.options.resourcePt.port,
-        path:     self.options.resourcePt.base + endpoint,
-        headers:  {'Authorization': 'Bearer ' + token,
-                   'Content-Type': 'application/json; charset=UTF-8'},
-        postData: JSON.stringify(data)
-      }, cb);
+      self.env.req(reqOptions.call(self, 'POST', endpoint, {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json; charset=UTF-8'
+      }, JSON.stringify(data)), cb);
     });
   };
 
@@ -192,26 +194,10 @@
   var deleteResource = DoctapeCore.prototype.deleteResource = function (endpoint, cb) {
     var self = this;
     withValidAccessToken.call(this, function (token) {
-      self.env.req({
-        method:   'DELETE',
-        protocol: self.options.resourcePt.protocol,
-        host:     self.options.resourcePt.host,
-        port:     self.options.resourcePt.port,
-        path:     self.options.resourcePt.base + endpoint,
-        headers:  {'Authorization': 'Bearer ' + token}
-      }, cb);
+      self.env.req(reqOptions.call(self, 'DELETE', endpoint, {
+        'Authorization': 'Bearer ' + token
+      }), cb);
     });
-  };
-
-  /**
-   * Try to get a valid access token, or throw.
-   */
-  var getValidAccessToken = DoctapeCore.prototype.getValidAccessToken = function () {
-    if (this._token.access && this._token.timestamp + this._token.timeout * 1000 > (new Date()).getTime()) {
-      return this._token.access;
-    } else {
-      throw new Error('Access Token Expired');
-    }
   };
 
   /**
@@ -220,16 +206,24 @@
    * @param {function (?string)} fn
    */
   var withValidAccessToken = DoctapeCore.prototype.withValidAccessToken = function (fn) {
-    if (this._token.access && this._token.timestamp + this._token.timeout * 1000 > (new Date()).getTime()) {
-      return fn(this._token.access);
-    } else {
-      var self = this;
+    var self = this;
+    var errorHandler = function () {
       var on_refresh = function () {
         withValidAccessToken.call(self, fn);
         unsubscribe.call(self, 'auth.refresh', on_refresh);
       };
-      subscribe.call(this, 'auth.refresh', on_refresh);
-      refresh.call(this);
+      subscribe.call(self, 'auth.refresh', on_refresh);
+      refresh.call(self);
+    };
+    if (this._token.access && this._token.timeout && this._token.timestamp + this._token.timeout * 1000 > (new Date()).getTime()) {
+      this.env.req(reqOptions.call(this, 'GET', '/account', {
+        'Authorization': 'Bearer ' + this._token.access
+      }), function (err, data) {
+        if (err) return errorHandler();
+        fn(self._token.access);
+      });
+    } else {
+      errorHandler();
     }
   };
 
