@@ -125,7 +125,7 @@ In case the authorization fails, the function registered as `onauthfail` will be
 
 ## Testing
 
-There exist several test for the basic infrastructure and OAuth authentication. You launch these by running [`mocha`](http://visionmedia.github.com/mocha/) (together with [should.js](http://github.com/visionmedia/should.js)) inside the top directory. You need to insert valid credentials and a valid authorization code into `test.js` to make all tests pass successfully.
+There exist several test for the basic infrastructure and OAuth authentication. You launch these by running [`mocha`](http://mochajs.org/) (together with [should.js](http://github.com/visionmedia/should.js)) inside the top directory. You need to insert valid credentials and a valid authorization code into `test.js` to make all tests pass successfully.
 
 
 ## Building
